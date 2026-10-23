@@ -194,28 +194,33 @@
     </div>
 
     <div class="field">
-      <label for="name">2. Content name</label>
+      <label for="stage">2. Funnel stage</label>
+      <select id="stage"></select>
+    </div>
+
+    <div class="field">
+      <label for="name">3. Content name</label>
       <input type="text" id="name" placeholder="Discover the new Wingify platform">
       <p class="hint">Used as the heading. The campaign value comes from the permalink slug.</p>
     </div>
 
     <div class="field">
-      <span class="label">3. Channels</span>
+      <span class="label">4. Channels</span>
       <div id="channels"></div>
     </div>
 
     <div class="field">
-      <label for="long">4. Permalink (long URL)</label>
+      <label for="long">5. Permalink (long URL)</label>
       <input type="url" id="long" placeholder="https://wingify.com/webinars/...">
     </div>
 
     <div class="field">
-      <label for="short">5. Short URL <span class="hint">(optional)</span></label>
+      <label for="short">6. Short URL <span class="hint">(optional)</span></label>
       <input type="url" id="short" placeholder="Short URL from WordPress">
     </div>
 
     <div class="field">
-      <label for="sfid">6. Salesforce Campaign ID</label>
+      <label for="sfid">7. Salesforce Campaign ID</label>
       <input type="text" id="sfid" placeholder="701MI000016cpgkYAA">
       <p class="hint">15 or 18 characters, starts with 701.</p>
     </div>
@@ -230,6 +235,12 @@
 <script>
 // ---- Taxonomy (edit here) ----
 const ALLOWED_DOMAINS = ['wingify.com'];
+
+const FUNNEL_STAGES = [
+  { code: 'tof', label: 'Top of funnel' },
+  { code: 'mof', label: 'Middle of funnel' },
+  { code: 'bof', label: 'Bottom of funnel' },
+];
 
 const TYPES = [
   { code: 'wb', label: 'Webinar (incl. virtual event)' },
@@ -348,6 +359,7 @@ function withUtms(baseUrl, params) {
 function build(state) {
   const errors = [];
   const typeCode = state.type;
+  if (!FUNNEL_STAGES.some(f => f.code === state.stage)) errors.push('Pick a funnel stage.');
 
   const long = parseUrl(state.long);
   if (!String(state.long || '').trim()) errors.push('Add the permalink (long URL).');
@@ -382,7 +394,7 @@ function build(state) {
 
   if (errors.length) return { errors };
 
-  const campaign = typeCode + '_' + slug + '_' + sf.id18;
+  const campaign = state.stage + '-' + typeCode + '_' + slug + '_' + sf.id18;
   const links = [];
   for (const s of selected) {
     const contents = contentsFor(s.item, typeCode);
@@ -408,6 +420,8 @@ if (typeof document !== 'undefined') {
   const $ = id => document.getElementById(id);
 
   $('type').innerHTML = TYPES.map(t => `<option value="${t.code}">${t.label}</option>`).join('');
+  $('stage').innerHTML = '<option value="">Pick a stage…</option>' +
+    FUNNEL_STAGES.map(f => `<option value="${f.code}">${f.label}</option>`).join('');
 
   $('channels').innerHTML = CHANNEL_GROUPS.map(g => `
     <fieldset>
@@ -438,6 +452,7 @@ if (typeof document !== 'undefined') {
     }
     return {
       type: $('type').value,
+      stage: $('stage').value,
       name: $('name').value,
       long: $('long').value,
       short: $('short').value,
@@ -564,7 +579,7 @@ if (typeof document !== 'undefined') {
           <tr><th>Parameter</th><th>Answers</th><th>Value</th></tr>
           <tr><td><code>utm_source</code></td><td>Which platform or sender?</td><td>From the channel (see Channels)</td></tr>
           <tr><td><code>utm_medium</code></td><td>What kind of channel?</td><td>From the channel (see Channels)</td></tr>
-          <tr><td><code>utm_campaign</code></td><td>Which content?</td><td><code>{type code}_{permalink slug}_{Salesforce Campaign ID}</code><br>e.g. <code>wb_discover-the-new-wingify-platform_701MI000016cpgkYAA</code></td></tr>
+          <tr><td><code>utm_campaign</code></td><td>Which content?</td><td><code>{stage}-{type}_{permalink slug}_{Salesforce Campaign ID}</code><br>e.g. <code>tof-wb_discover-the-new-wingify-platform_701MI000016cpgkYAA</code></td></tr>
           <tr><td><code>utm_content</code></td><td>Which post or email?</td><td>From the channel and content type</td></tr>
           <tr><td><code>utm_id</code></td><td>Which Salesforce campaign?</td><td>18-character Salesforce Campaign ID</td></tr>
           <tr><td><code>utm_term</code></td><td>—</td><td>Not used. Reserved for paid search keywords.</td></tr>
@@ -576,6 +591,14 @@ if (typeof document !== 'undefined') {
         <div class="table-wrap"><table>
           <tr><th>utm_source</th><th>Channel checkbox</th><th>utm_content</th></tr>
           ${channelRows}
+        </table></div>
+      </section>
+
+      <section class="card">
+        <h2>Funnel stages</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Stage</th><th>Code</th></tr>
+          ${FUNNEL_STAGES.map(f => `<tr><td>${f.label}</td><td><code>${f.code}</code></td></tr>`).join('')}
         </table></div>
       </section>
 

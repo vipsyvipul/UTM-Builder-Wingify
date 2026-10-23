@@ -7,7 +7,7 @@ A one-page tool that builds consistent UTM links for Wingify content: webinars, 
 
 ## How to use
 
-1. Pick the **content type** and type the **content name**.
+1. Pick the **content type** and **funnel stage**, then type the **content name**.
 2. Tick every **channel** you will share the link on.
 3. Paste the **permalink** from WordPress. Add the **short URL** if you have one.
 4. Paste the **Salesforce Campaign ID** (starts with `701`).
@@ -21,14 +21,14 @@ Use a separate link for each channel and placement. Don't reuse a LinkedIn link 
 |---|---|
 | `utm_source` | Platform or sender, e.g. `linkedin`, `marketing`, `sdr` |
 | `utm_medium` | Channel type, e.g. `social`, `email`, `partner` |
-| `utm_campaign` | `{type code}_{permalink slug}_{Salesforce Campaign ID}` |
+| `utm_campaign` | `{stage}-{type}_{permalink slug}_{Salesforce Campaign ID}`, e.g. `tof-wb_…` |
 | `utm_content` | Which post or email, e.g. `company`, `speaker`, `invite` |
 | `utm_id` | Salesforce Campaign ID (18 characters) |
 
 Example:
 
 ```
-https://wingify.com/webinars/discover-the-new-wingify-platform/?utm_source=linkedin&utm_medium=social&utm_campaign=wb_discover-the-new-wingify-platform_701MI000016cpgkYAA&utm_content=company&utm_id=701MI000016cpgkYAA
+https://wingify.com/webinars/discover-the-new-wingify-platform/?utm_source=linkedin&utm_medium=social&utm_campaign=tof-wb_discover-the-new-wingify-platform_701MI000016cpgkYAA&utm_content=company&utm_id=701MI000016cpgkYAA
 ```
 
 The **Matrix** tab lists every allowed value and how values are grouped.
@@ -45,6 +45,7 @@ All values are defined at the top of the `<script>` in `index.html`:
 
 | To change | Edit |
 |---|---|
+| Funnel stages and codes | `FUNNEL_STAGES` |
 | Content types and codes | `TYPES` |
 | Channels, sources, mediums | `CHANNEL_GROUPS` |
 | Marketing email `utm_content` values | `EMAIL_CONTENTS` |

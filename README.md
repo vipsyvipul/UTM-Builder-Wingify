@@ -8,7 +8,7 @@ A one-page tool that builds consistent UTM links for Wingify content: webinars, 
 ## How to use
 
 1. Pick the **content type** and **funnel stage**.
-2. Tick every **channel** you will share the link on.
+2. Tick every **channel** you will share the link on. For **Marketing email**, set how many invites and reminders you will send.
 3. Paste the **permalink** from WordPress. Add the **short URL** if you have one.
 4. Paste the **Salesforce Campaign ID** (starts with `701`).
 5. Click **Copy** next to each link, or **Copy all** to paste the full set into Google Sheets.
@@ -22,7 +22,7 @@ Use a separate link for each channel and placement. Don't reuse a LinkedIn link 
 | `utm_source` | Platform or sender, e.g. `linkedin`, `marketing`, `sdr` |
 | `utm_medium` | Channel type, e.g. `social`, `email`, `partner` |
 | `utm_campaign` | `{stage}-{type}_{permalink slug}_{Salesforce Campaign ID}`, e.g. `tof-wb_…` |
-| `utm_content` | Which post or email, e.g. `company`, `speaker`, `invite` |
+| `utm_content` | Which post or email, e.g. `company`, `speaker`, `invite-1`, `reminder-2` |
 | `utm_id` | Salesforce Campaign ID (18 characters) |
 
 Example:
@@ -49,6 +49,7 @@ All values are defined at the top of the `<script>` in `index.html`:
 | Content types and codes | `TYPES` |
 | Channels, sources, mediums | `CHANNEL_GROUPS` |
 | Marketing email `utm_content` values | `EMAIL_CONTENTS` |
+| Emails that get numbered (`invite-1`, `invite-2`...) | `NUMBERED_EMAILS` |
 | Mediums allowed for "Other" | `OTHER_MEDIUMS` |
 | Allowed permalink domains | `ALLOWED_DOMAINS` |
 

@@ -50,7 +50,7 @@ All values are defined at the top of the `<script>` in `index.html`:
 | Channels, sources, mediums | `CHANNEL_GROUPS` |
 | Marketing email `utm_content` values | `EMAIL_CONTENTS` |
 | Emails that get numbered (`invite-1`, `invite-2`...) | `NUMBERED_EMAILS` |
-| Mediums suggested for "Other" (users can type their own) | `OTHER_MEDIUMS` |
+| Mediums listed for "Other" (users can also type their own) | `OTHER_MEDIUMS` |
 | Allowed permalink domains | `ALLOWED_DOMAINS` |
 
 The Builder and Matrix tabs both read from these lists, so one edit updates both.

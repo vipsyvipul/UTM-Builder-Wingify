@@ -329,14 +329,6 @@
   .todo li.done .todo-label { font-weight: 500; color: var(--twilight); }
   .todo-hint { display: block; color: #9e2202; margin-top: 2px; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .note {
-    font-size: 13px;
-    color: var(--twilight);
-    background: var(--eggshell);
-    border-radius: var(--radius-s);
-    padding: 10px 14px;
-    margin: 0 0 18px;
-  }
 
   /* ---- Matrix ---- */
   .matrix { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
@@ -425,7 +417,7 @@
         <div class="field-row">
           <div class="field">
             <label class="field-label" for="short">Short URL <span class="opt">(optional)</span></label>
-            <input type="url" id="short" placeholder="From WordPress">
+            <input type="url" id="short" placeholder="https://wingify.com/s/123456/">
           </div>
           <div class="field">
             <label class="field-label" for="sfid">Salesforce Campaign ID</label>
@@ -820,7 +812,6 @@ if (typeof document !== 'undefined') {
     }
 
     current = result;
-    const hasShort = result.links.some(l => l.short);
     const groups = [];
     for (const l of result.links) {
       if (!groups.length || groups[groups.length - 1].name !== l.group) groups.push({ name: l.group, links: [] });
@@ -839,7 +830,6 @@ if (typeof document !== 'undefined') {
         <li class="chip p-content">content</li>
         <li class="chip p-id">id</li>
       </ul>
-      ${hasShort ? '<p class="note">Short links keep UTMs only if the redirect forwards them. Test one before using.</p>' : ''}
       ${groups.map(g => `
         <div class="group">
           <div class="group-head"><span class="group-name">${esc(g.name)}</span><span class="group-count">${g.links.length}</span></div>

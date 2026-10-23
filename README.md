@@ -37,7 +37,7 @@ Why the Salesforce ID is in `utm_campaign` too: Heeet saves `utm_campaign` on th
 
 ## Short URLs
 
-Short links keep UTMs only if the redirect passes the query string on. Before using short links, test one: open it with `?utm_source=test` added and check that the address bar still shows `utm_source=test`.
+WordPress short links look like `https://wingify.com/s/158336/`. The redirect passes UTMs on to the page, so short links with UTMs track the same as long ones (tested 23 Oct 2026).
 
 ## Changing values
 

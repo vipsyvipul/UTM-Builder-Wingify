@@ -573,7 +573,7 @@ function slugFromPermalink(u) {
   return last === 'index' ? '' : slugify(decodeURIComponent(last));
 }
 
-// counts: { invite: 2, reminder: 1 }; a missing count means 1
+// counts: { invite: 2, reminder: 1 }; each count is kept between 1 and MAX_EMAILS, missing means 1
 function contentsFor(item, type, counts = {}) {
   if (item.contents === 'social') {
     return ['company', 'employee'].concat(type === 'wb' || type === 'pc' ? ['speaker'] : []);
@@ -581,7 +581,7 @@ function contentsFor(item, type, counts = {}) {
   if (item.contents === 'email') {
     return EMAIL_CONTENTS[type].flatMap(c => {
       if (!NUMBERED_EMAILS.some(n => n.code === c)) return [c];
-      const n = counts[c] === undefined ? 1 : Math.min(Math.max(parseInt(counts[c], 10) || 0, 0), MAX_EMAILS);
+      const n = Math.min(Math.max(parseInt(counts[c], 10) || 1, 1), MAX_EMAILS);
       return Array.from({ length: n }, (_, i) => c + '-' + (i + 1));
     });
   }
@@ -631,9 +631,6 @@ function build(state) {
       const medium = item.medium || ch.medium;
       if (item.input) channelChecks.push([item.label + ': ' + item.input.toLowerCase(), source ? '' : item.label + ': add the ' + item.input.toLowerCase() + '.', true]);
       if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': pick a medium.', true]);
-      if (item.contents === 'email') {
-        channelChecks.push([item.label + ': how many', contentsFor(item, typeCode, state.emailCounts).length ? '' : item.label + ': set at least 1 invite or reminder.']);
-      }
       selected.push({ group: g.group, item, source, medium });
     }
   }
@@ -690,7 +687,7 @@ if (typeof document !== 'undefined') {
         ${extras.map(item => item.contents === 'email' ? `
           <div class="extra" data-extra="${item.id}">
             <span class="extra-label">How many</span>
-            ${NUMBERED_EMAILS.map(n => `<label class="count"><span>${esc(n.label)}</span><input type="number" data-count="${n.code}" min="0" max="${MAX_EMAILS}" value="1"></label>`).join('')}
+            ${NUMBERED_EMAILS.map(n => `<label class="count"><span>${esc(n.label)}</span><input type="number" data-count="${n.code}" min="1" max="${MAX_EMAILS}" value="1"></label>`).join('')}
           </div>` : `
           <div class="extra" data-extra="${item.id}">
             <span class="extra-label">${esc(item.label)}</span>

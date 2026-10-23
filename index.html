@@ -558,6 +558,13 @@ function parseSfId(raw) {
   return { id18 };
 }
 
+// Adds https:// when the permalink has no scheme; an existing scheme is kept
+function withScheme(raw) {
+  const v = String(raw || '').trim();
+  if (!v || /^[a-z][a-z0-9+.-]*:\/\//i.test(v)) return v;
+  return 'https://' + v.replace(/^\/\//, '');
+}
+
 function parseUrl(raw) {
   try {
     const u = new URL(String(raw || '').trim());
@@ -607,7 +614,7 @@ function build(state) {
   const typeCode = state.type;
   check('Funnel stage', FUNNEL_STAGES.some(f => f.code === state.stage) ? '' : 'Pick a funnel stage.', true);
 
-  const long = parseUrl(state.long);
+  const long = parseUrl(withScheme(state.long));
   const slug = long ? slugFromPermalink(long) : '';
   check('Permalink',
     !String(state.long || '').trim() ? 'Add the permalink (long URL).'
@@ -738,7 +745,7 @@ if (typeof document !== 'undefined') {
 
   // Campaign parts for the live preview, filled in as soon as each input is valid
   function campaignParts(state) {
-    const long = parseUrl(state.long);
+    const long = parseUrl(withScheme(state.long));
     const slug = long && isAllowedHost(long.hostname) ? slugFromPermalink(long) : '';
     const sf = parseSfId(state.sfid);
     return [
@@ -972,7 +979,11 @@ if (typeof document !== 'undefined') {
     else if (String(n) !== el.value) el.value = n;
   }
   $('form').addEventListener('input', e => { clampCount(e); render(); });
-  $('form').addEventListener('change', e => { clampCount(e); render(); });
+  $('form').addEventListener('change', e => {
+    clampCount(e);
+    if (e.target === $('long')) $('long').value = withScheme($('long').value);
+    render();
+  });
   $('form').addEventListener('submit', e => e.preventDefault());
 
   $('output').addEventListener('click', e => {

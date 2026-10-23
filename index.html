@@ -315,17 +315,14 @@
     flex: none;
     width: 20px;
     height: 20px;
-    margin-top: 1px;
     border: 1.5px solid var(--dusk);
     border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 12px;
-    font-weight: 700;
   }
-  .todo li.done .tick { background: var(--midnight); border-color: var(--midnight); color: var(--yellow); }
-  .todo li.done .tick::before { content: "✓"; }
-  .todo-label { display: block; font-weight: 600; }
+  .todo li.done .tick {
+    border-color: var(--midnight);
+    background: var(--midnight) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='8' viewBox='0 0 10 8'%3E%3Cpath d='M1 4.2l2.6 2.6L9 1.2' fill='none' stroke='%23EEFF6D' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 10px 8px no-repeat;
+  }
+  .todo-label { display: block; font-weight: 600; line-height: 20px; }
   .todo li.done .todo-label { font-weight: 500; color: var(--twilight); }
   .todo-hint { display: block; color: #9e2202; margin-top: 2px; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -598,12 +595,13 @@ function withUtms(baseUrl, params) {
 }
 
 // state: { type, stage, long, short, sfid, emailCounts, channels: { [id]: { on, source, medium } } }
-// Returns checks: [{ label, error }] for the checklist; error is '' when the check passes
+// Returns checks: [{ label, error, empty }] for the checklist; error is '' when the check passes,
+// empty is true when the input is blank (the checklist shows error text only for filled-in but wrong inputs)
 function build(state) {
   const checks = [];
-  const check = (label, error) => checks.push({ label, error: error || '' });
+  const check = (label, error, empty) => checks.push({ label, error: error || '', empty: !!empty });
   const typeCode = state.type;
-  check('Funnel stage', FUNNEL_STAGES.some(f => f.code === state.stage) ? '' : 'Pick a funnel stage.');
+  check('Funnel stage', FUNNEL_STAGES.some(f => f.code === state.stage) ? '' : 'Pick a funnel stage.', true);
 
   const long = parseUrl(state.long);
   const slug = long ? slugFromPermalink(long) : '';
@@ -612,7 +610,7 @@ function build(state) {
     : !long ? 'Permalink is not a valid URL. It should start with https://'
     : !isAllowedHost(long.hostname) ? 'Permalink must be on ' + ALLOWED_DOMAINS.join(' or ') + '.'
     : !slug ? 'Permalink has no slug. Use the full WordPress permalink, like https://wingify.com/webinars/your-webinar/'
-    : '');
+    : '', !String(state.long || '').trim());
 
   let short = null;
   if (String(state.short || '').trim()) {
@@ -621,7 +619,7 @@ function build(state) {
   }
 
   const sf = parseSfId(state.sfid);
-  check('Salesforce Campaign ID', sf.error);
+  check('Salesforce Campaign ID', sf.error, !String(state.sfid || '').trim());
 
   const selected = [];
   const channelChecks = [];
@@ -631,16 +629,16 @@ function build(state) {
       if (!ch || !ch.on) continue;
       const source = item.input ? slugify(ch.source) : item.source;
       const medium = item.medium || ch.medium;
-      if (item.input) channelChecks.push([item.label + ': ' + item.input.toLowerCase(), source ? '' : item.label + ': add the ' + item.input.toLowerCase() + '.']);
-      if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': pick a medium.']);
+      if (item.input) channelChecks.push([item.label + ': ' + item.input.toLowerCase(), source ? '' : item.label + ': add the ' + item.input.toLowerCase() + '.', true]);
+      if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': pick a medium.', true]);
       if (item.contents === 'email') {
         channelChecks.push([item.label + ': how many', contentsFor(item, typeCode, state.emailCounts).length ? '' : item.label + ': set at least 1 invite or reminder.']);
       }
       selected.push({ group: g.group, item, source, medium });
     }
   }
-  check('Channels', selected.length ? '' : 'Tick at least one channel.');
-  for (const [label, error] of channelChecks) check(label, error);
+  check('Channels', selected.length ? '' : 'Tick at least one channel.', true);
+  for (const [label, error, empty] of channelChecks) check(label, error, empty);
 
   const errors = checks.filter(c => c.error).map(c => c.error);
   if (errors.length) return { errors, checks };
@@ -803,7 +801,7 @@ if (typeof document !== 'undefined') {
         <h2 class="panel-title">Checklist<small>${done} of ${result.checks.length} done</small></h2>
         <ul>${result.checks.map(c => `<li class="${c.error ? '' : 'done'}">
           <span class="tick" aria-hidden="true"></span>
-          <span><span class="todo-label">${esc(c.label)}</span>${c.error ? `<span class="todo-hint">${esc(c.error)}</span>` : '<span class="sr-only"> (done)</span>'}</span>
+          <span><span class="todo-label">${esc(c.label)}</span>${c.error && !c.empty ? `<span class="todo-hint">${esc(c.error)}</span>` : ''}${c.error ? '' : '<span class="sr-only"> (done)</span>'}</span>
         </li>`).join('')}</ul>
       </div>`;
       return;

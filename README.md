@@ -7,7 +7,7 @@ A one-page tool that builds consistent UTM links for Wingify content: webinars, 
 
 ## How to use
 
-1. Pick the **content type** and **funnel stage**, then type the **content name**.
+1. Pick the **content type** and **funnel stage**.
 2. Tick every **channel** you will share the link on.
 3. Paste the **permalink** from WordPress. Add the **short URL** if you have one.
 4. Paste the **Salesforce Campaign ID** (starts with `701`).

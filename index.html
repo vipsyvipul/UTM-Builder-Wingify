@@ -392,10 +392,6 @@
           <span class="field-label" id="stage-label">Funnel stage</span>
           <div class="pills" role="radiogroup" aria-labelledby="stage-label" id="stage"></div>
         </div>
-        <div class="field">
-          <label class="field-label" for="name">Content name</label>
-          <input type="text" id="name" placeholder="Discover the new Wingify platform">
-        </div>
       </section>
 
       <section class="step">
@@ -585,8 +581,8 @@ function build(state) {
   const sf = parseSfId(state.sfid);
   if (sf.error) errors.push(sf.error);
 
-  const slug = (long && slugFromPermalink(long)) || slugify(state.name);
-  if (long && !slug) errors.push('Permalink has no slug. Add a content name so the campaign value can be built from it.');
+  const slug = long ? slugFromPermalink(long) : '';
+  if (long && !slug) errors.push('Permalink has no slug. Use the full WordPress permalink, like https://wingify.com/webinars/your-webinar/');
 
   const selected = [];
   for (const g of CHANNEL_GROUPS) {
@@ -678,7 +674,6 @@ if (typeof document !== 'undefined') {
     return {
       type: checkedValue('type'),
       stage: checkedValue('stage'),
-      name: $('name').value,
       long: $('long').value,
       short: $('short').value,
       sfid: $('sfid').value,
@@ -689,7 +684,7 @@ if (typeof document !== 'undefined') {
   // Campaign parts for the live preview, filled in as soon as each input is valid
   function campaignParts(state) {
     const long = parseUrl(state.long);
-    const slug = (long && isAllowedHost(long.hostname) && slugFromPermalink(long)) || slugify(state.name);
+    const slug = long && isAllowedHost(long.hostname) ? slugFromPermalink(long) : '';
     const sf = parseSfId(state.sfid);
     return [
       { value: state.stage, label: 'Stage', placeholder: 'stage', sep: '-' },
@@ -777,7 +772,7 @@ if (typeof document !== 'undefined') {
     let i = 0;
     out.innerHTML = `
       <div class="panel-head">
-        <h2 class="panel-title">${esc(state.name.trim() || 'Your links')}<small>${result.links.length} links</small></h2>
+        <h2 class="panel-title">Your links<small>${result.links.length} links</small></h2>
         <button type="button" class="btn btn-primary" data-copy-all>Copy all for Sheets</button>
       </div>
       <ul class="legend" aria-label="Parameter colors">

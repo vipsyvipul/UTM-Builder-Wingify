@@ -59,7 +59,7 @@
   /* ---- Top: brand band ---- */
   .band {
     background: linear-gradient(180deg, var(--yellow) 0%, var(--offwhite) 100%);
-    padding: 16px 16px 32px;
+    padding: 12px 16px;
   }
   .nav {
     max-width: 1240px;
@@ -88,20 +88,8 @@
   }
   .tabs a[aria-current="page"] { background: var(--midnight); color: var(--offwhite); }
 
-  .intro { max-width: 1240px; margin: 36px auto 0; padding: 0 16px; }
-  h1 {
-    font-family: var(--serif);
-    font-weight: 900;
-    font-size: clamp(36px, 5.2vw, 60px);
-    line-height: 1.02;
-    letter-spacing: -0.025em;
-    margin: 0;
-    max-width: 14ch;
-  }
-  .lede { font-size: 17px; color: var(--twilight); max-width: 56ch; margin: 14px 0 0; }
-
   /* ---- Builder layout ---- */
-  main { max-width: 1240px; margin: 0 auto; padding: 0 16px 64px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 20px 16px 48px; }
   .builder {
     display: grid;
     grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
@@ -114,9 +102,9 @@
     background: var(--white);
     border: 1px solid var(--feather);
     border-radius: var(--radius-l);
-    padding: 8px 28px;
+    padding: 4px 24px;
   }
-  .step { padding: 24px 0 26px; }
+  .step { padding: 18px 0 20px; }
   .step + .step { border-top: 1px solid var(--feather); }
   .step-title {
     display: flex;
@@ -124,20 +112,22 @@
     gap: 12px;
     font-family: var(--serif);
     font-weight: 700;
-    font-size: 22px;
+    font-size: 19px;
     letter-spacing: -0.01em;
-    margin: 0 0 18px;
+    margin: 0 0 12px;
   }
   .step-num {
     flex: none;
-    width: 28px; height: 28px;
+    width: 24px; height: 24px;
     border-radius: 50%;
     background: var(--midnight);
     color: var(--yellow);
-    font: 700 14px/28px var(--sans);
+    font: 700 13px/24px var(--sans);
     text-align: center;
   }
-  .field { margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 14px; }
+  .field-row .field { margin-bottom: 0; }
   .field:last-child { margin-bottom: 0; }
   .field-label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
   .field-label .opt { font-weight: 400; color: var(--twilight); }
@@ -145,7 +135,7 @@
 
   input[type="text"], input[type="url"], select {
     width: 100%;
-    padding: 11px 14px;
+    padding: 9px 12px;
     border: 1px solid var(--feather);
     border-radius: var(--radius-s);
     background: var(--offwhite);
@@ -183,7 +173,7 @@
   .pill input[type="checkbox"]:checked + span::before { content: "✓"; color: var(--yellow); font-weight: 700; }
   .pill input:focus-visible + span { outline: 2px solid var(--midnight); outline-offset: 2px; }
 
-  .ch-group + .ch-group { margin-top: 16px; }
+  .ch-group + .ch-group { margin-top: 12px; }
   .ch-group-name { font-size: 13px; color: var(--twilight); margin: 0 0 8px; }
   .extras { display: grid; gap: 8px; margin-top: 10px; }
   .extra { display: none; gap: 8px; align-items: center; }
@@ -199,7 +189,7 @@
     background: var(--midnight);
     color: var(--offwhite);
     border-radius: var(--radius-l);
-    padding: 24px 26px 26px;
+    padding: 20px 22px;
   }
   .anatomy-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; }
   .anatomy-title { font-family: var(--serif); font-weight: 700; font-size: 20px; margin: 0; }
@@ -229,10 +219,16 @@
     background: var(--white);
     border: 1px solid var(--feather);
     border-radius: var(--radius-l);
-    padding: 24px 26px;
+    padding: 0 22px 20px;
   }
-  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-  .panel-title { font-family: var(--serif); font-weight: 700; font-size: 24px; letter-spacing: -0.01em; margin: 0; }
+  .panel > :first-child { padding-top: 20px; }
+  .panel-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 1;
+    background: var(--white);
+    padding-bottom: 12px;
+  }
+  .panel-title { font-family: var(--serif); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; margin: 0; }
   .panel-title small { font-family: var(--sans); font-weight: 500; font-size: 14px; color: var(--twilight); margin-left: 8px; letter-spacing: 0; }
 
   .btn {
@@ -251,7 +247,7 @@
   .btn-small { padding: 6px 13px; font-size: 13px; }
   .btn.copied { background: var(--yellow); border-color: var(--midnight); color: var(--midnight); }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; padding: 0; list-style: none; font-size: 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 12px; }
   .chip {
     display: inline-block;
     padding: 2px 8px;
@@ -265,32 +261,41 @@
   .p-content { background: var(--p-content-bg); color: var(--p-content-fg); }
   .p-id { background: var(--p-id-bg); color: var(--p-id-fg); }
 
-  .group { margin-top: 22px; }
-  .group:first-of-type { margin-top: 0; }
-  .group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .group-name { font-weight: 700; font-size: 15px; }
+  .group + .group { margin-top: 18px; }
+  .group-head { display: flex; align-items: baseline; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--midnight); }
+  .group-name { font-weight: 700; font-size: 14px; }
   .group-count { font-size: 13px; color: var(--twilight); }
-
-  .link {
-    border: 1px solid var(--feather);
-    border-radius: var(--radius-m);
-    padding: 12px 14px;
-    background: var(--offwhite);
+  .link { border-bottom: 1px solid var(--feather); }
+  .link-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 46px; }
+  .link-toggle {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 8px 0;
+    border: 0; background: none;
+    font: 600 14px var(--sans); color: var(--midnight);
+    text-align: left; cursor: pointer;
   }
-  .link + .link { margin-top: 8px; }
-  .link-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .link-label { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .link-actions { display: flex; gap: 6px; }
+  .link-toggle:hover .link-name { text-decoration: underline; }
+  .chev {
+    flex: none; width: 7px; height: 7px; margin: 0 3px 0 1px;
+    border-right: 1.5px solid var(--twilight); border-bottom: 1.5px solid var(--twilight);
+    transform: rotate(-45deg);
+  }
+  .link-toggle[aria-expanded="true"] .chev { transform: rotate(45deg); }
+  .link-actions { display: flex; gap: 6px; flex: none; }
   .url {
     display: block;
-    margin-top: 10px;
+    margin: 0 0 10px 15px;
+    padding: 8px 10px;
+    background: var(--offwhite);
+    border-radius: var(--radius-s);
     font: 400 12.5px/1.75 var(--mono);
     color: var(--twilight);
     overflow-wrap: anywhere;
   }
   .url mark { border-radius: 4px; padding: 1px 3px; }
 
-  .empty-state h2, .todo h2 { font-family: var(--serif); font-weight: 700; font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .empty-state h2, .todo h2 { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0 0 6px; letter-spacing: -0.01em; }
   .empty-state p { color: var(--twilight); margin: 0; }
   .todo ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
   .todo li {
@@ -315,8 +320,8 @@
 
   /* ---- Matrix ---- */
   .matrix { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .matrix .panel h2 { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.01em; margin: 0 0 4px; }
-  .matrix .panel > p { color: var(--twilight); margin: 0 0 16px; max-width: 70ch; }
+  .matrix .panel h2 { font-family: var(--serif); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; margin: 0 0 12px; }
+  .matrix .panel > p { color: var(--twilight); margin: -4px 0 12px; max-width: 70ch; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--feather); vertical-align: top; }
@@ -337,20 +342,26 @@
   @media (prefers-reduced-motion: no-preference) {
     .btn, .pill span, .tabs a { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
   }
+  @media (min-width: 981px) {
+    .results { position: sticky; top: 16px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; gap: 16px; }
+    .anatomy { flex: none; }
+    .results .panel { min-height: 0; overflow-y: auto; }
+  }
   @media (max-width: 980px) {
     .builder { grid-template-columns: minmax(0, 1fr); }
     .matrix-grid { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 560px) {
-    .band { padding-bottom: 28px; }
     .nav { padding-left: 14px; }
     .brand span { display: none; }
     .tabs a { padding: 7px 13px; }
-    .intro { margin-top: 28px; }
     .sheet { padding: 4px 18px; }
     .anatomy, .panel { padding: 20px 18px; }
     .extra { flex-wrap: wrap; }
     .extra-label { width: 100%; }
+    .field-row { grid-template-columns: minmax(0, 1fr); }
+    .link-head { flex-wrap: wrap; gap: 0 10px; }
+    .link-actions { padding-bottom: 8px; }
   }
 </style>
 </head>
@@ -366,25 +377,16 @@
       <a href="#matrix" data-tab="matrix">Matrix</a>
     </div>
   </nav>
-  <div class="intro" id="intro-builder">
-    <h1>Tag every link the same way.</h1>
-    <p class="lede">Say what you're promoting and where you'll share it. Every link follows one naming scheme, so Salesforce and analytics group your results correctly.</p>
-  </div>
-  <div class="intro" id="intro-matrix" hidden>
-    <h1>Every value, in one place.</h1>
-    <p class="lede">The full list of values the builder uses, grouped the way reports roll them up. Colors match the parameters in the builder.</p>
-  </div>
 </div>
 
 <main>
   <div class="builder" id="tab-builder">
     <form class="sheet" id="form" autocomplete="off">
       <section class="step">
-        <h2 class="step-title"><span class="step-num">1</span>What you're promoting</h2>
+        <h2 class="step-title"><span class="step-num">1</span>Content</h2>
         <div class="field">
-          <span class="field-label" id="type-label">Content type</span>
+          <span class="field-label" id="type-label">Content type <span class="opt">(virtual events count as webinars)</span></span>
           <div class="pills" role="radiogroup" aria-labelledby="type-label" id="type"></div>
-          <p class="hint">Virtual events count as webinars.</p>
         </div>
         <div class="field">
           <span class="field-label" id="stage-label">Funnel stage</span>
@@ -393,30 +395,29 @@
         <div class="field">
           <label class="field-label" for="name">Content name</label>
           <input type="text" id="name" placeholder="Discover the new Wingify platform">
-          <p class="hint">Shown as the heading above your links.</p>
         </div>
       </section>
 
       <section class="step">
-        <h2 class="step-title"><span class="step-num">2</span>Where it lives</h2>
+        <h2 class="step-title"><span class="step-num">2</span>URLs and Salesforce ID</h2>
         <div class="field">
           <label class="field-label" for="long">Permalink</label>
           <input type="url" id="long" placeholder="https://wingify.com/webinars/…">
-          <p class="hint">From WordPress. Its slug becomes part of the campaign name.</p>
         </div>
-        <div class="field">
-          <label class="field-label" for="short">Short URL <span class="opt">(optional)</span></label>
-          <input type="url" id="short" placeholder="Short URL from WordPress">
-        </div>
-        <div class="field">
-          <label class="field-label" for="sfid">Salesforce Campaign ID</label>
-          <input type="text" id="sfid" class="mono" placeholder="701MI000016cpgkYAA" spellcheck="false">
-          <p class="hint">15 or 18 characters, starts with 701.</p>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="short">Short URL <span class="opt">(optional)</span></label>
+            <input type="url" id="short" placeholder="From WordPress">
+          </div>
+          <div class="field">
+            <label class="field-label" for="sfid">Salesforce Campaign ID</label>
+            <input type="text" id="sfid" class="mono" placeholder="701…" spellcheck="false">
+          </div>
         </div>
       </section>
 
       <section class="step">
-        <h2 class="step-title"><span class="step-num">3</span>Where you'll share it</h2>
+        <h2 class="step-title"><span class="step-num">3</span>Channels</h2>
         <div id="channels"></div>
       </section>
     </form>
@@ -752,15 +753,15 @@ if (typeof document !== 'undefined') {
     if (untouched) {
       current = null;
       out.innerHTML = `<div class="empty-state">
-        <h2>Your links show up here</h2>
-        <p>Fill in the three steps on the left. Each channel you tick gets its own links, ready to copy.</p>
+        <h2>No links yet</h2>
+        <p>Complete steps 1 to 3.</p>
       </div>`;
       return;
     }
     if (result.errors.length) {
       current = null;
       out.innerHTML = `<div class="todo">
-        <h2>Almost there</h2>
+        <h2>Missing</h2>
         <ul>${result.errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul>
       </div>`;
       return;
@@ -786,22 +787,25 @@ if (typeof document !== 'undefined') {
         <li class="chip p-content">content</li>
         <li class="chip p-id">id</li>
       </ul>
-      ${hasShort ? '<p class="note">Short links keep UTMs only if the redirect passes them on. Test once: open a short link and check the address bar still shows utm_source.</p>' : ''}
+      ${hasShort ? '<p class="note">Short links keep UTMs only if the redirect forwards them. Test one before using.</p>' : ''}
       ${groups.map(g => `
         <div class="group">
-          <div class="group-head"><span class="group-name">${esc(g.name)}</span><span class="group-count">${g.links.length} ${g.links.length === 1 ? 'link' : 'links'}</span></div>
+          <div class="group-head"><span class="group-name">${esc(g.name)}</span><span class="group-count">${g.links.length}</span></div>
           ${g.links.map(l => {
             const n = i++;
             const [name, content] = l.label.split(' · ');
             return `<div class="link">
               <div class="link-head">
-                <span class="link-label">${esc(name)}${content ? ` <span class="chip p-content">${esc(content)}</span>` : ''}</span>
+                <button type="button" class="link-toggle" aria-expanded="false" aria-controls="url-${n}">
+                  <span class="chev" aria-hidden="true"></span>
+                  <span class="link-name">${esc(name)}</span>${content ? `<span class="chip p-content">${esc(content)}</span>` : ''}
+                </button>
                 <span class="link-actions">
                   <button type="button" class="btn btn-small" data-copy="${n}" data-kind="long">Copy</button>
                   ${l.short ? `<button type="button" class="btn btn-small" data-copy="${n}" data-kind="short">Copy short</button>` : ''}
                 </span>
               </div>
-              <code class="url">${urlHtml(l.long)}</code>
+              <code class="url" id="url-${n}" hidden>${urlHtml(l.long)}</code>
             </div>`;
           }).join('')}
         </div>`).join('')}`;
@@ -847,8 +851,7 @@ if (typeof document !== 'undefined') {
 
     $('tab-matrix').innerHTML = `
       <section class="panel">
-        <h2>How each link is built</h2>
-        <p>Five parameters, each answering one question.</p>
+        <h2>Parameters</h2>
         <div class="table-wrap"><table>
           <tr><th>Parameter</th><th>Answers</th><th>Value</th></tr>
           <tr><td>${chip('source', 'utm_source')}</td><td>Which platform or sender?</td><td>Set by the channel</td></tr>
@@ -862,7 +865,7 @@ if (typeof document !== 'undefined') {
 
       <section class="panel">
         <h2>Channels</h2>
-        <p>Grouped by medium, the way reports roll them up.</p>
+        <p>Grouped by utm_medium.</p>
         <div class="table-wrap"><table>
           <tr><th>Source</th><th>Channel</th><th>Content</th></tr>
           ${channelRows}
@@ -872,7 +875,6 @@ if (typeof document !== 'undefined') {
       <div class="matrix-grid">
         <section class="panel">
           <h2>Content types</h2>
-          <p>The type code and the emails each type gets.</p>
           <div class="table-wrap"><table>
             <tr><th>Type</th><th>Code</th><th>Marketing emails</th></tr>
             ${typeRows}
@@ -880,7 +882,6 @@ if (typeof document !== 'undefined') {
         </section>
         <section class="panel">
           <h2>Funnel stages</h2>
-          <p>The first part of every campaign name.</p>
           <div class="table-wrap"><table>
             <tr><th>Stage</th><th>Code</th></tr>
             ${stageRows}
@@ -890,7 +891,7 @@ if (typeof document !== 'undefined') {
 
       <section class="panel">
         <h2>Formatting rules</h2>
-        <p>Applied automatically. Nobody has to remember them.</p>
+        <p>Applied automatically.</p>
         <ul class="rules">
           <li>Values are lowercase. Spaces and special characters become hyphens, and accents are removed: Conversión becomes conversion.</li>
           <li>Underscores separate the parts of the campaign name. Hyphens join words inside a part.</li>
@@ -903,9 +904,7 @@ if (typeof document !== 'undefined') {
   function showTab() {
     const tab = location.hash === '#matrix' ? 'matrix' : 'builder';
     $('tab-builder').hidden = tab !== 'builder';
-    $('intro-builder').hidden = tab !== 'builder';
     $('tab-matrix').hidden = tab !== 'matrix';
-    $('intro-matrix').hidden = tab !== 'matrix';
     document.querySelectorAll('[data-tab]').forEach(a => {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
@@ -923,6 +922,12 @@ if (typeof document !== 'undefined') {
   $('output').addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn || !current) return;
+    if (btn.classList.contains('link-toggle')) {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      $(btn.getAttribute('aria-controls')).hidden = !open;
+      return;
+    }
     if (btn.hasAttribute('data-copy-all')) {
       const hasShort = current.links.some(l => l.short);
       const rows = [['Link', 'Long URL'].concat(hasShort ? ['Short URL'] : [])];

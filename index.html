@@ -558,7 +558,7 @@ function parseSfId(raw) {
   return { id18 };
 }
 
-// Adds https:// when the permalink has no scheme; an existing scheme is kept
+// Adds https:// when a URL has no scheme; an existing scheme is kept
 function withScheme(raw) {
   const v = String(raw || '').trim();
   if (!v || /^[a-z][a-z0-9+.-]*:\/\//i.test(v)) return v;
@@ -625,7 +625,7 @@ function build(state) {
 
   let short = null;
   if (String(state.short || '').trim()) {
-    short = parseUrl(state.short);
+    short = parseUrl(withScheme(state.short));
     check('Short URL', short ? '' : 'Short URL is not a valid URL. It should start with https://');
   }
 
@@ -981,7 +981,7 @@ if (typeof document !== 'undefined') {
   $('form').addEventListener('input', e => { clampCount(e); render(); });
   $('form').addEventListener('change', e => {
     clampCount(e);
-    if (e.target === $('long')) $('long').value = withScheme($('long').value);
+    if (e.target === $('long') || e.target === $('short')) e.target.value = withScheme(e.target.value);
     render();
   });
   $('form').addEventListener('submit', e => e.preventDefault());

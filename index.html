@@ -953,8 +953,18 @@ if (typeof document !== 'undefined') {
   showTab();
   window.addEventListener('hashchange', showTab);
 
-  $('form').addEventListener('input', render);
-  $('form').addEventListener('change', render);
+  // Keep invite/reminder boxes within 1 to MAX_EMAILS; a blank box is allowed while typing and becomes 1 on leaving it
+  function clampCount(e) {
+    const el = e.target;
+    if (!el.matches('[data-count]')) return;
+    if (el.value === '') { if (e.type === 'change') el.value = 1; return; }
+    const n = parseInt(el.value, 10);
+    if (!(n >= 1)) el.value = 1;
+    else if (n > MAX_EMAILS) el.value = MAX_EMAILS;
+    else if (String(n) !== el.value) el.value = n;
+  }
+  $('form').addEventListener('input', e => { clampCount(e); render(); });
+  $('form').addEventListener('change', e => { clampCount(e); render(); });
   $('form').addEventListener('submit', e => e.preventDefault());
 
   $('output').addEventListener('click', e => {

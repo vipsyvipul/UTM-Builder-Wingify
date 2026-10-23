@@ -308,20 +308,27 @@
   }
   .url mark { border-radius: 4px; padding: 1px 3px; }
 
-  .empty-state h2, .todo h2 { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0 0 6px; letter-spacing: -0.01em; }
-  .empty-state p { color: var(--twilight); margin: 0; }
-  .todo ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
-  .todo li {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-    padding: 10px 14px;
-    border-radius: var(--radius-s);
-    background: var(--cherry-tint);
-    color: #6e1c08;
-    font-size: 14px;
+  .todo ul { list-style: none; margin: 14px 0 0; padding: 0; }
+  .todo li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--feather); font-size: 14px; }
+  .todo li:first-child { border-top: 0; }
+  .todo .tick {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border: 1.5px solid var(--dusk);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
   }
-  .todo li::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--cherry-rich); transform: translateY(-1px); }
+  .todo li.done .tick { background: var(--midnight); border-color: var(--midnight); color: var(--yellow); }
+  .todo li.done .tick::before { content: "✓"; }
+  .todo-label { display: block; font-weight: 600; }
+  .todo li.done .todo-label { font-weight: 500; color: var(--twilight); }
+  .todo-hint { display: block; color: #9e2202; margin-top: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .note {
     font-size: 13px;
     color: var(--twilight);
@@ -591,46 +598,52 @@ function withUtms(baseUrl, params) {
 }
 
 // state: { type, stage, long, short, sfid, emailCounts, channels: { [id]: { on, source, medium } } }
+// Returns checks: [{ label, error }] for the checklist; error is '' when the check passes
 function build(state) {
-  const errors = [];
+  const checks = [];
+  const check = (label, error) => checks.push({ label, error: error || '' });
   const typeCode = state.type;
-  if (!FUNNEL_STAGES.some(f => f.code === state.stage)) errors.push('Pick a funnel stage.');
+  check('Funnel stage', FUNNEL_STAGES.some(f => f.code === state.stage) ? '' : 'Pick a funnel stage.');
 
   const long = parseUrl(state.long);
-  if (!String(state.long || '').trim()) errors.push('Add the permalink (long URL).');
-  else if (!long) errors.push('Permalink is not a valid URL. It should start with https://');
-  else if (!isAllowedHost(long.hostname)) errors.push('Permalink must be on ' + ALLOWED_DOMAINS.join(' or ') + '.');
+  const slug = long ? slugFromPermalink(long) : '';
+  check('Permalink',
+    !String(state.long || '').trim() ? 'Add the permalink (long URL).'
+    : !long ? 'Permalink is not a valid URL. It should start with https://'
+    : !isAllowedHost(long.hostname) ? 'Permalink must be on ' + ALLOWED_DOMAINS.join(' or ') + '.'
+    : !slug ? 'Permalink has no slug. Use the full WordPress permalink, like https://wingify.com/webinars/your-webinar/'
+    : '');
 
   let short = null;
   if (String(state.short || '').trim()) {
     short = parseUrl(state.short);
-    if (!short) errors.push('Short URL is not a valid URL. It should start with https://');
+    check('Short URL', short ? '' : 'Short URL is not a valid URL. It should start with https://');
   }
 
   const sf = parseSfId(state.sfid);
-  if (sf.error) errors.push(sf.error);
-
-  const slug = long ? slugFromPermalink(long) : '';
-  if (long && !slug) errors.push('Permalink has no slug. Use the full WordPress permalink, like https://wingify.com/webinars/your-webinar/');
+  check('Salesforce Campaign ID', sf.error);
 
   const selected = [];
+  const channelChecks = [];
   for (const g of CHANNEL_GROUPS) {
     for (const item of g.items) {
       const ch = state.channels[item.id];
       if (!ch || !ch.on) continue;
       const source = item.input ? slugify(ch.source) : item.source;
       const medium = item.medium || ch.medium;
-      if (!source) errors.push(item.label + ': add the ' + item.input.toLowerCase() + '.');
-      if (!medium) errors.push(item.label + ': pick a medium.');
-      if (item.contents === 'email' && !contentsFor(item, typeCode, state.emailCounts).length) {
-        errors.push(item.label + ': set at least 1 invite or reminder.');
+      if (item.input) channelChecks.push([item.label + ': ' + item.input.toLowerCase(), source ? '' : item.label + ': add the ' + item.input.toLowerCase() + '.']);
+      if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': pick a medium.']);
+      if (item.contents === 'email') {
+        channelChecks.push([item.label + ': how many', contentsFor(item, typeCode, state.emailCounts).length ? '' : item.label + ': set at least 1 invite or reminder.']);
       }
       selected.push({ group: g.group, item, source, medium });
     }
   }
-  if (!selected.length) errors.push('Tick at least one channel.');
+  check('Channels', selected.length ? '' : 'Tick at least one channel.');
+  for (const [label, error] of channelChecks) check(label, error);
 
-  if (errors.length) return { errors };
+  const errors = checks.filter(c => c.error).map(c => c.error);
+  if (errors.length) return { errors, checks };
 
   const campaign = state.stage + '-' + typeCode + '_' + slug + '_' + sf.id18;
   const links = [];
@@ -650,7 +663,7 @@ function build(state) {
       });
     }
   }
-  return { errors: [], campaign, id18: sf.id18, links };
+  return { errors: [], checks, campaign, id18: sf.id18, links };
 }
 
 // ---- UI ----
@@ -782,21 +795,16 @@ if (typeof document !== 'undefined') {
     renderAnatomy(state);
     const result = build(state);
     const out = $('output');
-    const untouched = !state.stage && !state.long && !state.sfid && !Object.values(state.channels).some(c => c.on);
 
-    if (untouched) {
-      current = null;
-      out.innerHTML = `<div class="empty-state">
-        <h2>No links yet</h2>
-        <p>Complete steps 1 to 3.</p>
-      </div>`;
-      return;
-    }
     if (result.errors.length) {
       current = null;
+      const done = result.checks.filter(c => !c.error).length;
       out.innerHTML = `<div class="todo">
-        <h2>Missing</h2>
-        <ul>${result.errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul>
+        <h2 class="panel-title">Checklist<small>${done} of ${result.checks.length} done</small></h2>
+        <ul>${result.checks.map(c => `<li class="${c.error ? '' : 'done'}">
+          <span class="tick" aria-hidden="true"></span>
+          <span><span class="todo-label">${esc(c.label)}</span>${c.error ? `<span class="todo-hint">${esc(c.error)}</span>` : '<span class="sr-only"> (done)</span>'}</span>
+        </li>`).join('')}</ul>
       </div>`;
       return;
     }

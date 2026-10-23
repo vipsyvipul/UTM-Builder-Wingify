@@ -56,4 +56,4 @@ The Builder and Matrix tabs both read from these lists, so one edit updates both
 
 ## Run locally
 
-Open `index.html` in a browser. No build step or dependencies.
+Open `index.html` in a browser. No build step. The Wingify logo and brand fonts (Lyon Display, DM Sans) load from the Wingify CDN, with system fonts as a fallback.

@@ -133,7 +133,7 @@
   .field-label .opt { font-weight: 400; color: var(--twilight); }
   .hint { color: var(--twilight); font-size: 13px; margin: 6px 0 0; }
 
-  input[type="text"], input[type="url"], input[type="number"], select {
+  input[type="text"], input[type="url"], input[type="number"] {
     width: 100%;
     padding: 9px 12px;
     border: 1px solid var(--feather);
@@ -142,19 +142,11 @@
     color: var(--midnight);
     font: inherit;
   }
-  select {
-    appearance: none;
-    padding-right: 34px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%235F5C53' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    cursor: pointer;
-  }
-  select:has(option[value=""]:checked) { color: var(--dusk); }
-  select option { color: var(--midnight); }
+  /* Plain text box: hide Chrome's datalist arrow, suggestions still show while typing */
+  input[list]::-webkit-calendar-picker-indicator { display: none !important; }
   input.mono { font-family: var(--mono); font-size: 14px; }
   input[type="text"]::placeholder, input[type="url"]::placeholder { color: var(--dusk); }
-  input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, select:focus {
+  input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus {
     outline: none;
     border-color: var(--midnight);
     background: var(--white);
@@ -189,7 +181,7 @@
   .extra { display: none; gap: 8px; align-items: center; }
   .extra.show { display: flex; }
   .extra-label { flex: none; width: 82px; font-size: 13px; font-weight: 600; }
-  .extra input, .extra select { flex: 1; min-width: 0; padding: 9px 12px; }
+  .extra input { flex: 1; min-width: 0; padding: 9px 12px; }
   .extra .count { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
   .extra .count + .count { margin-left: 8px; }
   .extra .count input { flex: none; width: 64px; }
@@ -489,6 +481,7 @@ const NUMBERED_EMAILS = [
 ];
 const MAX_EMAILS = 10;
 
+// Suggested mediums for "Other"; the user can also type their own
 const OTHER_MEDIUMS = ['social', 'paid-social', 'email', 'partner', 'community'];
 
 // contents: 'social' | 'email' | array of fixed values ([] = no utm_content)
@@ -628,9 +621,9 @@ function build(state) {
       const ch = state.channels[item.id];
       if (!ch || !ch.on) continue;
       const source = item.input ? slugify(ch.source) : item.source;
-      const medium = item.medium || ch.medium;
+      const medium = item.medium || slugify(ch.medium);
       if (item.input) channelChecks.push([item.label + ': ' + item.input.toLowerCase(), source ? '' : item.label + ': add the ' + item.input.toLowerCase() + '.', true]);
-      if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': pick a medium.', true]);
+      if (!item.medium) channelChecks.push([item.label + ': medium', medium ? '' : item.label + ': add the medium.', true]);
       selected.push({ group: g.group, item, source, medium });
     }
   }
@@ -692,7 +685,7 @@ if (typeof document !== 'undefined') {
           <div class="extra" data-extra="${item.id}">
             <span class="extra-label">${esc(item.label)}</span>
             <input type="text" data-src="${item.id}" placeholder="${esc(item.input)}" aria-label="${esc(item.label)}: ${esc(item.input)}">
-            ${item.medium ? '' : `<select data-med="${item.id}" aria-label="${esc(item.label)}: medium"><option value="">Medium…</option>${OTHER_MEDIUMS.map(m => `<option>${m}</option>`).join('')}</select>`}
+            ${item.medium ? '' : `<input type="text" data-med="${item.id}" list="mediums-${item.id}" placeholder="Medium" aria-label="${esc(item.label)}: medium"><datalist id="mediums-${item.id}">${OTHER_MEDIUMS.map(m => `<option value="${m}">`).join('')}</datalist>`}
           </div>`).join('')}
       </div>` : ''}
     </div>`;
@@ -870,7 +863,7 @@ if (typeof document !== 'undefined') {
     for (const [medium, items] of byMedium) {
       const mediumCell = medium
         ? chip('medium', medium)
-        : `<span class="muted">Picked by the user:</span> ${OTHER_MEDIUMS.map(m => chip('medium', m)).join('')}`;
+        : `<span class="muted">Typed by the user. Suggested:</span> ${OTHER_MEDIUMS.map(m => chip('medium', m)).join('')}`;
       channelRows += `<tr><td class="medium-row" colspan="3">${mediumCell}</td></tr>`;
       for (const item of items) {
         const source = item.input ? `<span class="muted">${esc(item.input)}, as typed</span>` : chip('source', item.source);

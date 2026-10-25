@@ -124,7 +124,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 20px 16px 48px; }
   border-radius: var(--radius-l);
   padding: 4px 24px;
 }
-.side .sheet { flex: 1; min-height: 0; overflow-y: auto; border: 0; border-radius: 0; }
+.side .sheet { flex: 1; min-height: 0; overflow-y: auto; border: 0; border-radius: 0; padding-block: 0; }
 .step { padding: 18px 0 20px; }
 .step + .step { border-top: 1px solid var(--feather); }
 .step-title {
@@ -198,6 +198,8 @@ input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, s
   cursor: pointer;
 }
 .choice span i { font-size: 17px; }
+.icons span { padding: 10px 0; }
+.icons span i { font-size: 19px; }
 .choice label:hover span { color: var(--midnight); }
 .choice input:checked + span { color: var(--offwhite); }
 .tiles input:checked + span { background: var(--midnight); }
@@ -400,6 +402,28 @@ footer a { color: inherit; }
   .pop { animation: pop .35s ease-out; }
   .inset { transition: margin-left .2s ease; }
 }
+/* Sidebar: fade at the top and bottom edge while there is more to scroll that way */
+@supports (animation-timeline: scroll()) {
+  .side .sheet::before, .side .sheet::after {
+    content: ""; position: sticky; z-index: 2; display: block; height: 40px;
+    pointer-events: none;
+    animation: linear both;
+    animation-timeline: scroll();
+  }
+  .side .sheet::before {
+    top: 0; margin-bottom: -40px;
+    background: linear-gradient(var(--white), transparent);
+    animation-name: edge-in; animation-range: 0 40px;
+  }
+  .side .sheet::after {
+    bottom: 0; margin-top: -40px;
+    background: linear-gradient(transparent, var(--white));
+    animation-name: edge-out; animation-range: calc(100% - 40px) 100%;
+  }
+  @keyframes edge-in { from { opacity: 0; } }
+  @keyframes edge-out { to { opacity: 0; } }
+}
+
 @media (min-width: 981px) {
   body.open .inset { margin-left: var(--side-w); }
   .results { position: sticky; top: calc(var(--top-h) + 16px); max-height: calc(100vh - var(--top-h) - 60px); display: flex; flex-direction: column; gap: 16px; }

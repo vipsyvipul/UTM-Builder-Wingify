@@ -35,10 +35,11 @@ const MAX_EMAILS = 10;
 // Mediums listed for "Other"; the user can also type their own
 const OTHER_MEDIUMS = ['social', 'paid-social', 'email', 'partner', 'community'];
 
+// iconOnly: show the group's channels as icons, with the name on hover
 // contents: 'social' | 'email' | array of fixed values ([] = no utm_content)
 // input: free-text source the user must type (partner name, community name...)
 const CHANNEL_GROUPS = [
-  { group: 'Social', items: [
+  { group: 'Social', iconOnly: true, items: [
     { id: 'linkedin', label: 'LinkedIn', icon: 'fa-brands fa-linkedin', source: 'linkedin', medium: 'social', contents: 'social' },
     { id: 'x', label: 'X', icon: 'fa-brands fa-x-twitter', source: 'x', medium: 'social', contents: 'social' },
     { id: 'facebook', label: 'Facebook', icon: 'fa-brands fa-facebook', source: 'facebook', medium: 'social', contents: 'social' },
@@ -88,6 +89,7 @@ function toId18(id15) {
 function parseSfId(raw) {
   const id = String(raw || '').trim();
   if (!id) return { error: 'Add the Salesforce Campaign ID.' };
+  if (/\s/.test(id)) return { error: 'Salesforce Campaign ID cannot contain spaces.' };
   return { id18: /^[a-zA-Z0-9]{15}$/.test(id) ? toId18(id) : id };
 }
 
@@ -226,8 +228,10 @@ if (typeof document !== 'undefined') {
     const extras = g.items.filter(item => item.input || item.contents === 'email');
     return `<div class="ch-group" role="group" aria-label="${g.group}">
       <p class="ch-group-name">${g.group}</p>
-      <div class="choice tiles">
-        ${g.items.map(item => `<label><input type="checkbox" data-ch="${item.id}"><span><i class="${item.icon}" aria-hidden="true"></i>${esc(item.label)}</span></label>`).join('')}
+      <div class="choice tiles${g.iconOnly ? ' icons' : ''}"${g.iconOnly ? ` style="--n:${g.items.length}"` : ''}>
+        ${g.items.map(item => g.iconOnly
+          ? `<label title="${esc(item.label)}"><input type="checkbox" data-ch="${item.id}" aria-label="${esc(item.label)}"><span><i class="${item.icon}" aria-hidden="true"></i></span></label>`
+          : `<label><input type="checkbox" data-ch="${item.id}"><span><i class="${item.icon}" aria-hidden="true"></i>${esc(item.label)}</span></label>`).join('')}
       </div>
       ${extras.length ? `<div class="extras">
         ${extras.map(item => item.contents === 'email' ? `

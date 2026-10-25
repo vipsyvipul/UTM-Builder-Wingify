@@ -151,6 +151,7 @@
     font: 700 13px/24px var(--sans);
     text-align: center;
   }
+  .step-sub { margin: -8px 0 12px 36px; font-style: italic; font-size: 13px; color: var(--twilight); }
   .field { margin-bottom: 14px; }
   .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 14px; }
   .field-row .field { margin-bottom: 0; }
@@ -430,9 +431,9 @@
 <aside class="side" id="side" aria-label="Campaign settings">
   <form class="sheet" id="form" autocomplete="off">
     <section class="step">
-      <h2 class="step-title"><span class="step-num">1</span>Content</h2>
+      <h2 class="step-title" id="type-label"><span class="step-num">1</span>Content Type</h2>
+      <p class="step-sub">(Virtual events count as webinars)</p>
       <div class="field">
-        <span class="field-label" id="type-label">Content type <span class="opt">(virtual events count as webinars)</span></span>
         <div class="pills" role="radiogroup" aria-labelledby="type-label" id="type"></div>
       </div>
       <div class="field">
@@ -486,8 +487,7 @@
   <div class="matrix" id="tab-matrix" hidden></div>
 </main>
 
-<footer>
-  Values and naming rules live in <a href="https://github.com/vipsyvipul/UTM-Builder-Wingify">the repository</a>. Changes to them update both tabs.
+<footer><a href="https://github.com/vipsyvipul/UTM-Builder-Wingify">Source code</a>
 </footer>
 </div>
 

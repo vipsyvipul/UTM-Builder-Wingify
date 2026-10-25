@@ -503,6 +503,20 @@ if (typeof document !== 'undefined') {
       </section>`;
   }
 
+  // Shift each parent box over the middle of its children's line, snapped to a child's line within 24px,
+  // deepest first; needs the tab visible
+  function alignTree() {
+    const mid = el => { const r = el.getBoundingClientRect(); return r.left + r.width / 2; };
+    for (const li of [...document.querySelectorAll('.tree li')].reverse()) {
+      const c = [...li.querySelectorAll(':scope > ul > li > span')].map(mid);
+      if (!c.length) continue;
+      let x = (c[0] + c[c.length - 1]) / 2;
+      const near = c.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a);
+      if (Math.abs(near - x) < 24) x = near;
+      li.style.setProperty('--x', x - mid(li) + 'px');
+    }
+  }
+
   function showTab() {
     const tab = location.hash === '#matrix' ? 'matrix' : 'builder';
     $('tab-builder').hidden = tab !== 'builder';
@@ -512,6 +526,7 @@ if (typeof document !== 'undefined') {
       else a.removeAttribute('aria-current');
     });
     document.body.dataset.tab = tab;
+    if (tab === 'matrix') document.fonts.ready.then(alignTree);
     setOpen(tab === 'builder' && !narrow.matches);
   }
 

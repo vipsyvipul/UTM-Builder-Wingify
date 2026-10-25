@@ -145,9 +145,13 @@ function withUtms(baseUrl, params) {
 // empty is true when the input is blank (the checklist shows error text only for filled-in but wrong inputs)
 function build(state) {
   const checks = [];
-  const check = (label, error, empty) => checks.push({ label, error: error || '', empty: !!empty });
+  // value: what the user picked, shown next to the label
+  const check = (label, error, empty, value) => checks.push({ label, error: error || '', empty: !!empty, value: value || '' });
   const typeCode = state.type;
-  check('Funnel stage', FUNNEL_STAGES.some(f => f.code === state.stage) ? '' : 'Pick a funnel stage.', true);
+  const type = TYPES.find(t => t.code === typeCode);
+  const stage = FUNNEL_STAGES.find(f => f.code === state.stage);
+  check('Content type', type ? '' : 'Pick a content type.', true, type && type.label);
+  check('Funnel stage', stage ? '' : 'Pick a funnel stage.', true, stage && stage.label);
 
   const long = parseUrl(withScheme(state.long));
   const slug = long ? slugFromPermalink(long) : '';
@@ -179,7 +183,7 @@ function build(state) {
       selected.push({ group: g.group, item, source, medium });
     }
   }
-  check('Channels', selected.length ? '' : 'Tick at least one channel.', true);
+  check('Channels', selected.length ? '' : 'Tick at least one channel.', true, selected.map(s => s.item.label).join(', '));
   for (const [label, error, empty] of channelChecks) check(label, error, empty);
 
   const errors = checks.filter(c => c.error).map(c => c.error);
@@ -354,7 +358,7 @@ if (typeof document !== 'undefined') {
         <h2 class="panel-title">Checklist<small><span class="${done !== lastDone ? 'pop' : ''}">${done}</span> of ${result.checks.length} done</small></h2>
         <ul>${result.checks.map(c => `<li class="${c.error ? '' : 'done'}">
           <span class="tick" aria-hidden="true"></span>
-          <span><span class="todo-label">${esc(c.label)}</span>${c.error && !c.empty ? `<span class="todo-hint">${esc(c.error)}</span>` : ''}${c.error ? '' : '<span class="sr-only"> (done)</span>'}</span>
+          <span><span class="todo-label">${esc(c.label)}${c.value ? ` - <span class="todo-val">${esc(c.value)}</span>` : ''}</span>${c.error && !c.empty ? `<span class="todo-hint">${esc(c.error)}</span>` : ''}${c.error ? '' : '<span class="sr-only"> (done)</span>'}</span>
         </li>`).join('')}</ul>
       </div>`;
       lastDone = done;
@@ -506,14 +510,15 @@ if (typeof document !== 'undefined') {
     setOpen(tab === 'builder' && !narrow.matches);
   }
 
-  // ---- Sidebar: open by default on wide screens, closed on narrow ones ----
+  // ---- Sidebar: always open on wide screens; on narrow ones a drawer opened by the floating button ----
   const narrow = matchMedia('(max-width: 980px)');
   function setOpen(open) {
     document.body.classList.toggle('open', open);
     $('side').inert = !open;
-    $('toggle').setAttribute('aria-expanded', String(open));
+    $('fab').setAttribute('aria-expanded', String(open));
   }
-  $('toggle').addEventListener('click', () => setOpen(!document.body.classList.contains('open')));
+  $('fab').addEventListener('click', () => setOpen(!document.body.classList.contains('open')));
+  narrow.addEventListener('change', showTab);
   $('dim').addEventListener('click', () => setOpen(false));
 
   renderMatrix();
@@ -530,6 +535,22 @@ if (typeof document !== 'undefined') {
     else if (n > MAX_EMAILS) el.value = MAX_EMAILS;
     else if (String(n) !== el.value) el.value = n;
   }
+  // ---- Hover highlight that follows the mouse within a button group ----
+  $('form').addEventListener('pointerover', e => {
+    const label = e.pointerType === 'mouse' && e.target.closest('.choice label');
+    if (!label) return;
+    const group = label.parentElement;
+    const fresh = !group.classList.contains('hover');
+    if (fresh) group.classList.add('jump');
+    for (const [k, v] of [['--hx', label.offsetLeft], ['--hy', label.offsetTop], ['--hw', label.offsetWidth], ['--hh', label.offsetHeight]]) group.style.setProperty(k, v + 'px');
+    if (fresh) { group.offsetWidth; group.classList.remove('jump'); }
+    group.classList.add('hover');
+  });
+  $('form').addEventListener('pointerout', e => {
+    const group = e.target.closest('.choice');
+    if (group && !group.contains(e.relatedTarget)) group.classList.remove('hover');
+  });
+
   // ---- Remember the form in this browser ----
   const key = el => el.id || (el.type === 'radio' ? el.name + '=' + el.value : Object.entries(el.dataset).flat().join('='));
   const isBox = el => el.type === 'radio' || el.type === 'checkbox';

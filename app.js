@@ -293,16 +293,18 @@ if (typeof document !== 'undefined') {
     ];
   }
 
+  let lastParts = [];
   function renderAnatomy(state) {
     const parts = campaignParts(state);
-    $('segments').innerHTML = parts.map(p => `<span class="seg${p.value ? '' : ' empty'}">
-        <span class="seg-row"><span class="seg-val">${esc(p.value || p.placeholder)}</span>${p.sep ? `<span class="sep">${p.sep}</span>` : ''}</span>
+    $('segments').innerHTML = parts.map((p, i) => `<span class="seg${p.value ? '' : ' empty'}">
+        <span class="seg-row"><span class="seg-val${p.value && p.value !== lastParts[i] ? ' pop' : ''}">${esc(p.value || p.placeholder)}</span>${p.sep ? `<span class="sep">${p.sep}</span>` : ''}</span>
         <span class="seg-label">${p.label}</span>
       </span>`).join('');
     const id = parts[3].value;
     $('anatomy-id').innerHTML = id
       ? `The same ID goes in <code>utm_id</code>: <code>${esc(id)}</code>`
       : 'The Salesforce ID also goes in <code>utm_id</code>, so analytics tools can match it.';
+    lastParts = parts.map(p => p.value);
   }
 
   // URL with each utm_ value highlighted in its parameter color
@@ -336,6 +338,7 @@ if (typeof document !== 'undefined') {
   }
 
   let current = null;
+  let lastDone;
 
   function render() {
     const state = readState();
@@ -347,12 +350,13 @@ if (typeof document !== 'undefined') {
       current = null;
       const done = result.checks.filter(c => !c.error).length;
       out.innerHTML = `<div class="todo">
-        <h2 class="panel-title">Checklist<small>${done} of ${result.checks.length} done</small></h2>
+        <h2 class="panel-title">Checklist<small><span class="${done !== lastDone ? 'pop' : ''}">${done}</span> of ${result.checks.length} done</small></h2>
         <ul>${result.checks.map(c => `<li class="${c.error ? '' : 'done'}">
           <span class="tick" aria-hidden="true"></span>
           <span><span class="todo-label">${esc(c.label)}</span>${c.error && !c.empty ? `<span class="todo-hint">${esc(c.error)}</span>` : ''}${c.error ? '' : '<span class="sr-only"> (done)</span>'}</span>
         </li>`).join('')}</ul>
       </div>`;
+      lastDone = done;
       return;
     }
 
@@ -392,7 +396,7 @@ if (typeof document !== 'undefined') {
                   ${l.short ? `<button type="button" class="btn btn-small" data-copy="${n}" data-kind="short">Copy short</button>` : ''}
                 </span>
               </div>
-              <code class="url" id="url-${n}" hidden>${urlHtml(l.long)}</code>
+              <div class="url-box" id="url-${n}" inert><div><code class="url">${urlHtml(l.long)}</code></div></div>
             </div>`;
           }).join('')}
         </div>`).join('')}`;
@@ -525,11 +529,30 @@ if (typeof document !== 'undefined') {
     else if (n > MAX_EMAILS) el.value = MAX_EMAILS;
     else if (String(n) !== el.value) el.value = n;
   }
-  $('form').addEventListener('input', e => { clampCount(e); render(); });
+  // ---- Remember the form in this browser ----
+  const key = el => el.id || (el.type === 'radio' ? el.name + '=' + el.value : Object.entries(el.dataset).flat().join('='));
+  const isBox = el => el.type === 'radio' || el.type === 'checkbox';
+  function save() {
+    const data = {};
+    for (const el of $('form').elements) if (key(el)) data[key(el)] = isBox(el) ? el.checked : el.value;
+    try { localStorage.setItem('form', JSON.stringify(data)); } catch (e) {}
+  }
+  function load() {
+    let data = {};
+    try { data = JSON.parse(localStorage.getItem('form')) || {}; } catch (e) {}
+    for (const el of $('form').elements) {
+      if (!(key(el) in data)) continue;
+      if (isBox(el)) el.checked = data[key(el)]; else el.value = data[key(el)];
+    }
+  }
+  $('clear').addEventListener('click', () => { $('form').reset(); render(); save(); });
+
+  $('form').addEventListener('input', e => { clampCount(e); render(); save(); });
   $('form').addEventListener('change', e => {
     clampCount(e);
     if (e.target === $('long') || e.target === $('short')) e.target.value = withScheme(e.target.value);
     render();
+    save();
   });
   $('form').addEventListener('submit', e => e.preventDefault());
 
@@ -539,7 +562,9 @@ if (typeof document !== 'undefined') {
     if (btn.classList.contains('link-toggle')) {
       const open = btn.getAttribute('aria-expanded') !== 'true';
       btn.setAttribute('aria-expanded', String(open));
-      $(btn.getAttribute('aria-controls')).hidden = !open;
+      const box = $(btn.getAttribute('aria-controls'));
+      box.classList.toggle('open', open);
+      box.inert = !open;
       return;
     }
     if (btn.hasAttribute('data-copy-all')) {
@@ -553,5 +578,6 @@ if (typeof document !== 'undefined') {
     copy(btn.dataset.kind === 'short' ? link.short : link.long, btn);
   });
 
+  load();
   render();
 }

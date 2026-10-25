@@ -455,7 +455,7 @@ footer a { color: inherit; }
   }
   .panel-head { top: var(--top-h); }
   body[data-tab="builder"] .fab { display: inline-flex; }
-  .side .sheet { padding-bottom: 72px; }
+  .side .step:last-child { padding-bottom: 92px; }
   body.open .dim { display: block; }
 }
 @media (max-width: 560px) {

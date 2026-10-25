@@ -298,11 +298,11 @@ if (typeof document !== 'undefined') {
     ];
   }
 
-  let lastParts = [];
+  let lastParts = null;
   function renderAnatomy(state) {
     const parts = campaignParts(state);
     $('segments').innerHTML = parts.map((p, i) => `<span class="seg${p.value ? '' : ' empty'}">
-        <span class="seg-row"><span class="seg-val${p.value && p.value !== lastParts[i] ? ' pop' : ''}">${esc(p.value || p.placeholder)}</span>${p.sep ? `<span class="sep">${p.sep}</span>` : ''}</span>
+        <span class="seg-row"><span class="seg-val${lastParts && p.value && p.value !== lastParts[i] && (!lastParts[i] || i < 2) ? ' pop' : ''}">${esc(p.value || p.placeholder)}</span>${p.sep ? `<span class="sep">${p.sep}</span>` : ''}</span>
         <span class="seg-label">${p.label}</span>
       </span>`).join('');
     const id = parts[3].value;
@@ -343,10 +343,14 @@ if (typeof document !== 'undefined') {
   }
 
   let current = null;
-  let lastDone;
+  let lastDone, lastState;
 
   function render() {
     const state = readState();
+    // A radio click fires input and change; skip the repeat so pop animations survive
+    const key = JSON.stringify(state);
+    if (key === lastState) return;
+    lastState = key;
     renderAnatomy(state);
     const result = build(state);
     const out = $('output');
@@ -355,7 +359,7 @@ if (typeof document !== 'undefined') {
       current = null;
       const done = result.checks.filter(c => !c.error).length;
       out.innerHTML = `<div class="todo">
-        <h2 class="panel-title">Checklist<small><span class="${done !== lastDone ? 'pop' : ''}">${done}</span> of ${result.checks.length} done</small></h2>
+        <h2 class="panel-title">Checklist<small><span class="${lastDone !== undefined && done !== lastDone ? 'pop' : ''}">${done}</span> of ${result.checks.length} done</small></h2>
         <ul>${result.checks.map(c => `<li class="${c.error ? '' : 'done'}">
           <span class="tick" aria-hidden="true"></span>
           <span><span class="todo-label">${esc(c.label)}${c.value ? ` - <span class="todo-val">${esc(c.value)}</span>` : ''}</span>${c.error && !c.empty ? `<span class="todo-hint">${esc(c.error)}</span>` : ''}${c.error ? '' : '<span class="sr-only"> (done)</span>'}</span>

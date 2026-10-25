@@ -60,11 +60,11 @@
   /* ---- Top: brand band ---- */
   .band {
     background: linear-gradient(180deg, var(--yellow) 0%, var(--offwhite) 100%);
+    height: var(--top-h);
     padding: 12px 16px;
+    position: sticky; top: 0; z-index: 21;
   }
   .nav {
-    max-width: 1240px;
-    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -89,14 +89,38 @@
   }
   .tabs a[aria-current="page"] { background: var(--midnight); color: var(--offwhite); }
 
+  .left { display: flex; align-items: center; gap: 8px; }
+  .toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    border: 0; border-radius: 9999px;
+    background: none; color: var(--midnight);
+    cursor: pointer;
+  }
+  .toggle:hover { background: var(--eggshell); }
+  body[data-tab="builder"] .nav { padding-left: 8px; }
+  body[data-tab="matrix"] .toggle { display: none; }
+
+  /* ---- Sidebar: holds the form, sits below the header, collapsible ---- */
+  :root { --side-w: 420px; --top-h: 84px; }
+  .side {
+    position: fixed; top: calc(var(--top-h) + 20px); bottom: 20px; left: 0; z-index: 20;
+    width: var(--side-w); max-width: calc(100% - 48px);
+    display: flex; flex-direction: column;
+    background: var(--white);
+    border-radius: 0 var(--radius-l) var(--radius-l) 0;
+    overflow: hidden;
+    transform: translateX(-100%);
+  }
+  body.open .side {
+    transform: none;
+    box-shadow: 0 8px 24px -6px rgba(33, 35, 38, .25);
+  }
+  .dim { display: none; position: fixed; inset: 0; z-index: 19; background: rgba(33, 35, 38, .4); }
+  .inset { min-width: 0; }
+
   /* ---- Builder layout ---- */
   main { max-width: 1240px; margin: 0 auto; padding: 20px 16px 48px; }
-  .builder {
-    display: grid;
-    grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
-  }
 
   /* Form: one sheet, three steps */
   .sheet {
@@ -105,6 +129,7 @@
     border-radius: var(--radius-l);
     padding: 4px 24px;
   }
+  .side .sheet { flex: 1; min-height: 0; overflow-y: auto; border: 0; border-radius: 0; }
   .step { padding: 18px 0 20px; }
   .step + .step { border-top: 1px solid var(--feather); }
   .step-title {
@@ -356,15 +381,20 @@
 
   @media (prefers-reduced-motion: no-preference) {
     .btn, .pill span, .tabs a { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+    .side { transition: transform .2s ease; }
+    .inset { transition: margin-left .2s ease; }
   }
   @media (min-width: 981px) {
-    .results { position: sticky; top: 16px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; gap: 16px; }
+    body.open .inset { margin-left: var(--side-w); }
+    .results { position: sticky; top: calc(var(--top-h) + 16px); max-height: calc(100vh - var(--top-h) - 32px); display: flex; flex-direction: column; gap: 16px; }
     .anatomy { flex: none; }
     .results .panel { min-height: 0; overflow-y: auto; }
   }
   @media (max-width: 980px) {
-    .builder { grid-template-columns: minmax(0, 1fr); }
     .matrix-grid { grid-template-columns: minmax(0, 1fr); }
+    /* Phones and tablets: the sidebar slides over the page */
+    .panel-head { top: var(--top-h); }
+    body.open .dim { display: block; }
   }
   @media (max-width: 560px) {
     .nav { padding-left: 14px; }
@@ -383,10 +413,13 @@
 <body>
 <div class="band">
   <nav class="nav" aria-label="Main">
-    <a class="brand" href="#builder">
-      <img src="https://static.wingify.com/gcp/wp-content/plugins/vwo-common-templates/images/wingify/logo-wingify.svg" alt="Wingify">
-      <span>UTM Builder</span>
-    </a>
+    <div class="left">
+      <button type="button" class="toggle" id="toggle" aria-controls="side" aria-expanded="false" aria-label="Toggle settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></button>
+      <a class="brand" href="#builder">
+        <img src="https://static.wingify.com/gcp/wp-content/plugins/vwo-common-templates/images/wingify/logo-wingify.svg" alt="Wingify">
+        <span>UTM Builder</span>
+      </a>
+    </div>
     <div class="tabs">
       <a href="#builder" data-tab="builder">Builder</a>
       <a href="#matrix" data-tab="matrix">Matrix</a>
@@ -394,45 +427,49 @@
   </nav>
 </div>
 
+<aside class="side" id="side" aria-label="Campaign settings">
+  <form class="sheet" id="form" autocomplete="off">
+    <section class="step">
+      <h2 class="step-title"><span class="step-num">1</span>Content</h2>
+      <div class="field">
+        <span class="field-label" id="type-label">Content type <span class="opt">(virtual events count as webinars)</span></span>
+        <div class="pills" role="radiogroup" aria-labelledby="type-label" id="type"></div>
+      </div>
+      <div class="field">
+        <span class="field-label" id="stage-label">Funnel stage</span>
+        <div class="pills" role="radiogroup" aria-labelledby="stage-label" id="stage"></div>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2 class="step-title"><span class="step-num">2</span>URLs and Salesforce ID</h2>
+      <div class="field">
+        <label class="field-label" for="long">Permalink</label>
+        <input type="url" id="long" placeholder="https://wingify.com/webinars/…">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="short">Short URL <span class="opt">(optional)</span></label>
+          <input type="url" id="short" placeholder="https://wingify.com/s/123456/">
+        </div>
+        <div class="field">
+          <label class="field-label" for="sfid">Salesforce Campaign ID</label>
+          <input type="text" id="sfid" class="mono" placeholder="701…" spellcheck="false">
+        </div>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2 class="step-title"><span class="step-num">3</span>Channels</h2>
+      <div id="channels"></div>
+    </section>
+  </form>
+</aside>
+<div class="dim" id="dim"></div>
+
+<div class="inset">
 <main>
   <div class="builder" id="tab-builder">
-    <form class="sheet" id="form" autocomplete="off">
-      <section class="step">
-        <h2 class="step-title"><span class="step-num">1</span>Content</h2>
-        <div class="field">
-          <span class="field-label" id="type-label">Content type <span class="opt">(virtual events count as webinars)</span></span>
-          <div class="pills" role="radiogroup" aria-labelledby="type-label" id="type"></div>
-        </div>
-        <div class="field">
-          <span class="field-label" id="stage-label">Funnel stage</span>
-          <div class="pills" role="radiogroup" aria-labelledby="stage-label" id="stage"></div>
-        </div>
-      </section>
-
-      <section class="step">
-        <h2 class="step-title"><span class="step-num">2</span>URLs and Salesforce ID</h2>
-        <div class="field">
-          <label class="field-label" for="long">Permalink</label>
-          <input type="url" id="long" placeholder="https://wingify.com/webinars/…">
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label" for="short">Short URL <span class="opt">(optional)</span></label>
-            <input type="url" id="short" placeholder="https://wingify.com/s/123456/">
-          </div>
-          <div class="field">
-            <label class="field-label" for="sfid">Salesforce Campaign ID</label>
-            <input type="text" id="sfid" class="mono" placeholder="701…" spellcheck="false">
-          </div>
-        </div>
-      </section>
-
-      <section class="step">
-        <h2 class="step-title"><span class="step-num">3</span>Channels</h2>
-        <div id="channels"></div>
-      </section>
-    </form>
-
     <div class="results">
       <section class="anatomy" aria-label="Campaign name preview">
         <div class="anatomy-head">
@@ -452,6 +489,7 @@
 <footer>
   Values and naming rules live in <a href="https://github.com/vipsyvipul/UTM-Builder-Wingify">the repository</a>. Changes to them update both tabs.
 </footer>
+</div>
 
 <script>
 // ---- Taxonomy (edit here) ----
@@ -953,7 +991,19 @@ if (typeof document !== 'undefined') {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
+    document.body.dataset.tab = tab;
+    setOpen(tab === 'builder' && !narrow.matches);
   }
+
+  // ---- Sidebar: open by default on wide screens, closed on narrow ones ----
+  const narrow = matchMedia('(max-width: 980px)');
+  function setOpen(open) {
+    document.body.classList.toggle('open', open);
+    $('side').inert = !open;
+    $('toggle').setAttribute('aria-expanded', String(open));
+  }
+  $('toggle').addEventListener('click', () => setOpen(!document.body.classList.contains('open')));
+  $('dim').addEventListener('click', () => setOpen(false));
 
   renderMatrix();
   showTab();

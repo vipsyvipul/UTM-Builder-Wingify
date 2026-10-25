@@ -414,33 +414,36 @@ if (typeof document !== 'undefined') {
   // ---- Matrix tab (built from the same taxonomy as the builder) ----
   const chip = (kind, v) => `<span class="chip p-${kind}">${esc(v)}</span>`;
 
-  function contentsHtml(item) {
-    if (item.contents === 'social') return `${chip('content', 'company')}${chip('content', 'employee')}${chip('content', 'speaker')} <span class="muted">speaker for webinars and podcasts only</span>`;
-    if (item.contents === 'email') return '<span class="muted">Depends on content type, see below</span>';
-    return item.contents.length ? item.contents.map(c => chip('content', c)).join('') : '<span class="muted">None</span>';
-  }
+  // One box; text with \n breaks into lines, note is the small grey line
+  const box = (kind, text, note) => `<span class="p-${kind}">${esc(text)}${note ? `<small>${esc(note)}</small>` : ''}</span>`;
 
-  function renderMatrix() {
+  // Tree: utm_medium > utm_source > utm_content. Sources with the same content values share a box.
+  function treeHtml() {
     const byMedium = new Map();
     for (const g of CHANNEL_GROUPS) {
       for (const item of g.items) {
         const key = item.medium || '';
-        if (!byMedium.has(key)) byMedium.set(key, []);
-        byMedium.get(key).push(item);
+        if (!byMedium.has(key)) byMedium.set(key, new Map());
+        // Webinars use every content value; other types use a subset
+        const contents = contentsFor(item, 'wb');
+        const key2 = contents.join();
+        const groups = byMedium.get(key);
+        if (!groups.has(key2)) groups.set(key2, { item, sources: [], contents });
+        groups.get(key2).sources.push(item.input ? `{${slugify(item.input)}}` : item.source);
       }
     }
-    let channelRows = '';
-    for (const [medium, items] of byMedium) {
-      const mediumCell = medium
-        ? chip('medium', medium)
-        : `<span class="muted">Picked from the list, or typed by the user:</span> ${OTHER_MEDIUMS.map(m => chip('medium', m)).join('')}`;
-      channelRows += `<tr><td class="medium-row" colspan="3">${mediumCell}</td></tr>`;
-      for (const item of items) {
-        const source = item.input ? `<span class="muted">${esc(item.input)}, as typed</span>` : chip('source', item.source);
-        channelRows += `<tr class="sub"><td>${source}</td><td>${esc(item.label)}</td><td>${contentsHtml(item)}</td></tr>`;
-      }
-    }
+    const content = (item, c) => {
+      const only = TYPES.filter(t => contentsFor(item, t.code).includes(c));
+      return `<li>${box('content', c.replace(/-1$/, '-{n}'), only.length < TYPES.length ? only.map(t => t.label).join(', ') : '')}</li>`;
+    };
+    const mediums = [...byMedium].map(([medium, groups]) => `<li>${box('medium', medium || '{medium}')}<ul>${
+      [...groups.values()].map(g => `<li>${box('source', g.sources.join('\n'))}${
+        g.contents.length ? `<ul>${g.contents.map(c => content(g.item, c)).join('')}</ul>` : ''}</li>`).join('')
+    }</ul></li>`).join('');
+    return `<ul class="tree"><li>${box('id', 'Link')}<ul>${mediums}</ul></li></ul>`;
+  }
 
+  function renderMatrix() {
     const typeRows = TYPES.map(t => `<tr>
       <td>${esc(t.label)}${t.note ? `<br><span class="muted">${esc(t.note)}</span>` : ''}</td>
       <td>${chip('campaign', t.code)}</td>
@@ -465,11 +468,9 @@ if (typeof document !== 'undefined') {
 
       <section class="panel">
         <h2>Channels</h2>
-        <p>Grouped by utm_medium.</p>
-        <div class="table-wrap"><table>
-          <tr><th>Source</th><th>Channel</th><th>Content</th></tr>
-          ${channelRows}
-        </table></div>
+        <p>${chip('medium', 'utm_medium')} › ${chip('source', 'utm_source')} › ${chip('content', 'utm_content')}</p>
+        <div class="table-wrap">${treeHtml()}</div>
+        <p class="hint">{medium} is ${OTHER_MEDIUMS.join(', ')} or typed by the user. Grey text: the content types that use the value.</p>
       </section>
 
       <div class="matrix-grid">

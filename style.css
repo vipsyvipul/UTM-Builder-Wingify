@@ -394,9 +394,23 @@ th { font-size: 13px; font-weight: 600; color: var(--twilight); background: var(
 th:first-child { border-top-left-radius: var(--radius-s); }
 th:last-child { border-top-right-radius: var(--radius-s); }
 tr:last-child td { border-bottom: 0; }
-td.medium-row { background: var(--offwhite); padding-top: 16px; }
-tr.sub td:first-child { position: relative; padding-left: 40px; }
-tr.sub td:first-child::before { content: ""; position: absolute; left: 20px; top: 0; bottom: 0; border-left: 2px solid var(--feather); }
+/* Channel tree: each li draws its half of the line above it; the ul draws the drop from its parent */
+.tree, .tree ul { display: flex; justify-content: center; margin: 0; padding: 0; list-style: none; }
+.tree { width: max-content; min-width: 100%; padding-bottom: 4px; }
+.tree ul { position: relative; padding-top: 20px; }
+.tree ul::before { content: ""; position: absolute; top: 0; left: 50%; height: 20px; border-left: 2px solid var(--midnight); }
+.tree li { position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px 1px 0; }
+.tree > li { padding-top: 0; }
+.tree li::before, .tree li::after { content: ""; position: absolute; top: 0; width: 50%; height: 20px; border-top: 2px solid var(--midnight); }
+.tree li::before { right: 50%; }
+.tree li::after { left: 50%; border-left: 2px solid var(--midnight); }
+.tree li:first-child::before, .tree li:last-child::after { border: 0; }
+.tree li:first-child::after { border-top-left-radius: 12px; }
+.tree li:last-child::before { border-right: 2px solid var(--midnight); border-top-right-radius: 12px; }
+.tree li:only-child::after { border-top: 0; border-left: 2px solid var(--midnight); border-radius: 0; }
+.tree li:only-child::before, .tree > li::before, .tree > li::after { display: none; }
+.tree span { padding: 6px 10px; border-radius: var(--radius-s); font-family: var(--mono); font-size: 12px; text-align: center; white-space: pre-line; }
+.tree small { display: block; font-family: var(--sans); font-size: 11px; color: var(--twilight); }
 td .chip { margin: 2px 4px 2px 0; }
 .muted { color: var(--twilight); }
 .rules { margin: 0; padding-left: 20px; }

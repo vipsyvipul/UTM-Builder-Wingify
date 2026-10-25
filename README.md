@@ -52,6 +52,8 @@ All values are defined at the top of `app.js`:
 | Emails that get numbered (`invite-1`, `invite-2`...) | `NUMBERED_EMAILS` |
 | Mediums listed for "Other" (users can also type their own) | `OTHER_MEDIUMS` |
 | Allowed permalink domains | `ALLOWED_DOMAINS` |
+| Slug used when the permalink is the homepage (`wingify-home`) | `HOME_SLUG` |
+| Channel icons ([Font Awesome](https://fontawesome.com/search?ic=free) classes) | `icon` in `CHANNEL_GROUPS` |
 
 The Builder and Matrix tabs both read from these lists, so one edit updates both.
 

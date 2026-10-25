@@ -1,10 +1,13 @@
 // ---- Taxonomy (edit here) ----
 const ALLOWED_DOMAINS = ['wingify.com'];
 
+// Slug used when the permalink has no path (the homepage)
+const HOME_SLUG = 'wingify-home';
+
 const FUNNEL_STAGES = [
-  { code: 'tof', label: 'Top of funnel' },
-  { code: 'mof', label: 'Middle of funnel' },
-  { code: 'bof', label: 'Bottom of funnel' },
+  { code: 'tof', label: 'Top' },
+  { code: 'mof', label: 'Middle' },
+  { code: 'bof', label: 'Bottom' },
 ];
 
 const TYPES = [
@@ -36,24 +39,24 @@ const OTHER_MEDIUMS = ['social', 'paid-social', 'email', 'partner', 'community']
 // input: free-text source the user must type (partner name, community name...)
 const CHANNEL_GROUPS = [
   { group: 'Social', items: [
-    { id: 'linkedin', label: 'LinkedIn', source: 'linkedin', medium: 'social', contents: 'social' },
-    { id: 'x', label: 'X', source: 'x', medium: 'social', contents: 'social' },
-    { id: 'facebook', label: 'Facebook', source: 'facebook', medium: 'social', contents: 'social' },
-    { id: 'instagram', label: 'Instagram', source: 'instagram', medium: 'social', contents: 'social' },
-    { id: 'youtube', label: 'YouTube', source: 'youtube', medium: 'social', contents: 'social' },
-    { id: 'linkedin-ads', label: 'LinkedIn Ads', source: 'linkedin', medium: 'paid-social', contents: ['ad'] },
+    { id: 'linkedin', label: 'LinkedIn', icon: 'fa-brands fa-linkedin', source: 'linkedin', medium: 'social', contents: 'social' },
+    { id: 'x', label: 'X', icon: 'fa-brands fa-x-twitter', source: 'x', medium: 'social', contents: 'social' },
+    { id: 'facebook', label: 'Facebook', icon: 'fa-brands fa-facebook', source: 'facebook', medium: 'social', contents: 'social' },
+    { id: 'instagram', label: 'Instagram', icon: 'fa-brands fa-instagram', source: 'instagram', medium: 'social', contents: 'social' },
+    { id: 'youtube', label: 'YouTube', icon: 'fa-brands fa-youtube', source: 'youtube', medium: 'social', contents: 'social' },
+    { id: 'linkedin-ads', label: 'LinkedIn Ads', icon: 'fa-solid fa-bullhorn', source: 'linkedin', medium: 'paid-social', contents: ['ad'] },
   ]},
   { group: 'Email', items: [
-    { id: 'marketing', label: 'Marketing email', source: 'marketing', medium: 'email', contents: 'email' },
-    { id: 'newsletter', label: 'Newsletter', source: 'newsletter', medium: 'email', contents: [] },
-    { id: 'sdr', label: 'SDR email', source: 'sdr', medium: 'email', contents: [] },
-    { id: 'ae', label: 'AE email', source: 'ae', medium: 'email', contents: [] },
-    { id: 'cs', label: 'CS email', source: 'cs', medium: 'email', contents: [] },
+    { id: 'marketing', label: 'Marketing email', icon: 'fa-solid fa-envelope', source: 'marketing', medium: 'email', contents: 'email' },
+    { id: 'newsletter', label: 'Newsletter', icon: 'fa-solid fa-newspaper', source: 'newsletter', medium: 'email', contents: [] },
+    { id: 'sdr', label: 'SDR email', icon: 'fa-solid fa-headset', source: 'sdr', medium: 'email', contents: [] },
+    { id: 'ae', label: 'AE email', icon: 'fa-solid fa-briefcase', source: 'ae', medium: 'email', contents: [] },
+    { id: 'cs', label: 'CS email', icon: 'fa-solid fa-life-ring', source: 'cs', medium: 'email', contents: [] },
   ]},
   { group: 'Other', items: [
-    { id: 'partner', label: 'Partner', medium: 'partner', contents: [], input: 'Partner name' },
-    { id: 'community', label: 'Community', medium: 'community', contents: [], input: 'Community name' },
-    { id: 'other', label: 'Other', medium: null, contents: [], input: 'Source name' },
+    { id: 'partner', label: 'Partner', icon: 'fa-solid fa-handshake', medium: 'partner', contents: [], input: 'Partner name' },
+    { id: 'community', label: 'Community', icon: 'fa-solid fa-users', medium: 'community', contents: [], input: 'Community name' },
+    { id: 'other', label: 'Other', icon: 'fa-solid fa-ellipsis', medium: null, contents: [], input: 'Source name' },
   ]},
 ];
 
@@ -81,18 +84,11 @@ function toId18(id15) {
   return id15 + suffix;
 }
 
+// Used as typed; a 15-character ID gets its 18-character form
 function parseSfId(raw) {
   const id = String(raw || '').trim();
   if (!id) return { error: 'Add the Salesforce Campaign ID.' };
-  if (!/^[a-zA-Z0-9]+$/.test(id) || (id.length !== 15 && id.length !== 18)) {
-    return { error: 'Salesforce Campaign ID must be 15 or 18 letters/numbers.' };
-  }
-  if (!id.startsWith('701')) return { error: 'Salesforce Campaign ID must start with 701 (that prefix means Campaign).' };
-  const id18 = toId18(id.slice(0, 15));
-  if (id.length === 18 && id18.slice(15) !== id.slice(15).toUpperCase()) {
-    return { error: 'Salesforce Campaign ID looks mistyped: the last 3 characters do not match. Copy it again from Salesforce.' };
-  }
-  return { id18 };
+  return { id18: /^[a-zA-Z0-9]{15}$/.test(id) ? toId18(id) : id };
 }
 
 // Adds https:// when a URL has no scheme; an existing scheme is kept
@@ -118,7 +114,7 @@ function isAllowedHost(host) {
 function slugFromPermalink(u) {
   const parts = u.pathname.split('/').filter(Boolean);
   const last = parts.length ? parts[parts.length - 1].replace(/\.(php|html?)$/, '') : '';
-  return last === 'index' ? '' : slugify(decodeURIComponent(last));
+  return (last === 'index' ? '' : slugify(decodeURIComponent(last))) || HOME_SLUG;
 }
 
 // counts: { invite: 2, reminder: 1 }; each count is kept between 1 and MAX_EMAILS, missing means 1
@@ -157,7 +153,6 @@ function build(state) {
     !String(state.long || '').trim() ? 'Add the permalink (long URL).'
     : !long ? 'Permalink is not a valid URL. It should start with https://'
     : !isAllowedHost(long.hostname) ? 'Permalink must be on ' + ALLOWED_DOMAINS.join(' or ') + '.'
-    : !slug ? 'Permalink has no slug. Use the full WordPress permalink, like https://wingify.com/webinars/your-webinar/'
     : '', !String(state.long || '').trim());
 
   let short = null;
@@ -218,19 +213,21 @@ if (typeof document !== 'undefined') {
     return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
-  function pill(type, name, value, label, checked) {
-    return `<label class="pill"><input type="${type}" name="${name}" value="${value}"${checked ? ' checked' : ''}><span>${esc(label)}</span></label>`;
+  function radio(name, value, label, checked) {
+    return `<label><input type="radio" name="${name}" value="${value}"${checked ? ' checked' : ''}><span>${esc(label)}</span></label>`;
   }
 
-  $('type').innerHTML = TYPES.map((t, i) => pill('radio', 'type', t.code, t.label, i === 0)).join('');
-  $('stage').innerHTML = FUNNEL_STAGES.map(f => pill('radio', 'stage', f.code, f.label, false)).join('');
+  $('type').innerHTML = TYPES.map((t, i) => radio('type', t.code, t.label, i === 0)).join('');
+  $('stage').innerHTML = FUNNEL_STAGES.map(f => radio('stage', f.code, f.label, false)).join('');
+  $('type').style.setProperty('--n', TYPES.length);
+  $('stage').style.setProperty('--n', FUNNEL_STAGES.length);
 
   $('channels').innerHTML = CHANNEL_GROUPS.map(g => {
     const extras = g.items.filter(item => item.input || item.contents === 'email');
     return `<div class="ch-group" role="group" aria-label="${g.group}">
       <p class="ch-group-name">${g.group}</p>
-      <div class="pills">
-        ${g.items.map(item => `<label class="pill"><input type="checkbox" data-ch="${item.id}"><span>${esc(item.label)}</span></label>`).join('')}
+      <div class="choice tiles">
+        ${g.items.map(item => `<label><input type="checkbox" data-ch="${item.id}"><span><i class="${item.icon}" aria-hidden="true"></i>${esc(item.label)}</span></label>`).join('')}
       </div>
       ${extras.length ? `<div class="extras">
         ${extras.map(item => item.contents === 'email' ? `
@@ -488,7 +485,7 @@ if (typeof document !== 'undefined') {
           <li>Values are lowercase. Spaces and special characters become hyphens, and accents are removed: Conversión becomes conversion.</li>
           <li>Underscores separate the parts of the campaign name. Hyphens join words inside a part.</li>
           <li>The Salesforce Campaign ID keeps its original case. 15-character IDs are converted to 18.</li>
-          <li>Permalinks must be on ${ALLOWED_DOMAINS.join(' or ')}.</li>
+          <li>Permalinks must be on ${ALLOWED_DOMAINS.join(' or ')}. A permalink with no path (the homepage) uses ${HOME_SLUG} as the slug.</li>
         </ul>
       </section>`;
   }

@@ -41,7 +41,7 @@ WordPress short links look like `https://wingify.com/s/158336/`. The redirect pa
 
 ## Changing values
 
-All values are defined at the top of the `<script>` in `index.html`:
+All values are defined at the top of `app.js`:
 
 | To change | Edit |
 |---|---|
@@ -57,4 +57,4 @@ The Builder and Matrix tabs both read from these lists, so one edit updates both
 
 ## Run locally
 
-Open `index.html` in a browser. No build step. The Wingify logo and brand fonts (Lyon Display, DM Sans) load from the Wingify CDN, with system fonts as a fallback.
+Open `index.html` in a browser. Styles are in `style.css`, logic in `app.js`. No build step. The Wingify logo and brand fonts (Lyon Display, DM Sans) load from the Wingify CDN, with system fonts as a fallback.
